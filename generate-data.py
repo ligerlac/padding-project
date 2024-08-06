@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
+from collections import defaultdict
 from utils import save_data, load_data
 
 
@@ -9,13 +10,14 @@ noise_amplitude = 0
 
 
 def get_random_features():
-    a = np.random.uniform(1, 2)
-    cx = np.random.uniform(-1, 1)
-    cy = np.random.uniform(-1, 1)
-    wx = np.random.uniform(0.1, 0.2)
-    wy = np.random.uniform(0.1, 0.2)
-    cor = np.random.uniform(0, 1)        
-    return a, cx, cy, wx, wy, cor
+    return {
+        'a': np.random.uniform(1, 2),
+        'cx': np.random.uniform(-1, 1),
+        'cy': np.random.uniform(-1, 1),
+        'wx': np.random.uniform(0.1, 0.2),
+        'wy': np.random.uniform(0.1, 0.2),
+        'cor': np.random.uniform(0, 1)
+    }
 
 
 def bivariate_gaussian(x, y, mu_x=0, mu_y=0, sig_x=1, sig_y=1, cor=0):
@@ -39,16 +41,18 @@ def main(args):
     x = np.linspace(-1, 1, n_pixels)
     y = np.linspace(-1, 1, n_pixels)
     xx, yy = np.meshgrid(x, y)
-    images, labels = [], []
+    images = []
+    labels = defaultdict(list)
     for i in range(10):
-        a, cx, cy, wx, wy, cor = get_random_features()
-        zz = bivariate_gaussian(xx, yy, mu_x=cx, mu_y=cy, sig_x=wx, sig_y=wy, cor=cor)
-        zz += bivariate_gaussian(xx, yy+2, mu_x=cx, mu_y=cy, sig_x=wx, sig_y=wy, cor=cor)
-        zz += bivariate_gaussian(xx, yy-2, mu_x=cx, mu_y=cy, sig_x=wx, sig_y=wy, cor=cor)
-        zz *= a / zz.sum()
+        rf = get_random_features()
+        zz = bivariate_gaussian(xx, yy, mu_x=rf['cx'], mu_y=rf['cy'], sig_x=rf['wx'], sig_y=rf['wy'], cor=rf['cor'])
+        zz += bivariate_gaussian(xx, yy - 2, mu_x=rf['cx'], mu_y=rf['cy'], sig_x=rf['wx'], sig_y=rf['wy'], cor=rf['cor'])
+        zz += bivariate_gaussian(xx, yy + 2, mu_x=rf['cx'], mu_y=rf['cy'], sig_x=rf['wx'], sig_y=rf['wy'], cor=rf['cor'])
+        zz *= rf['a'] / zz.sum()
         zz += noise_amplitude * np.random.rand(*zz.shape)
         images.append(zz)
-        labels.append((a, cx, cy, wx, wy, cor))
+        for key, value in rf.items():
+            labels[key].append(value)
     
     save_data(images, labels, 'data')
 
