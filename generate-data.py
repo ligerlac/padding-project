@@ -43,7 +43,7 @@ def main(args):
     xx, yy = np.meshgrid(x, y)
     images = []
     labels = defaultdict(list)
-    for i in range(10):
+    for i in range(args.n):
         rf = get_random_features()
         zz = bivariate_gaussian(xx, yy, mu_x=rf['cx'], mu_y=rf['cy'], sig_x=rf['wx'], sig_y=rf['wy'], cor=rf['cor'])
         zz += bivariate_gaussian(xx, yy - 2, mu_x=rf['cx'], mu_y=rf['cy'], sig_x=rf['wx'], sig_y=rf['wy'], cor=rf['cor'])
@@ -53,11 +53,13 @@ def main(args):
         images.append(zz)
         for key, value in rf.items():
             labels[key].append(value)
-    
+
     save_data(images, labels, 'data')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--output', type=str, default='data/my_file.npy', help='path to output file')
+    parser.add_argument('-n', type=int, default=100, help='number of generated examples')
     main(parser.parse_args())
+
