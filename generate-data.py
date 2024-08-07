@@ -1,7 +1,7 @@
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-from collections import defaultdict
+
 from utils import save_data, load_data
 
 
