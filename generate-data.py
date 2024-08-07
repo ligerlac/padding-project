@@ -45,9 +45,6 @@ def main(args):
         img += noise_amplitude * np.random.rand(*img.shape)
         images.append(img)
         labels.append((w, cx, cy))
-
-        # plt.imshow(img)
-        # plt.show()
     
     save_data(images, labels, 'data')
 
