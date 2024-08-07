@@ -6,7 +6,7 @@ from utils import save_data, load_data
 
 
 n_pixels = 16  # number of rows and columns, images will actually have ()**2 pixels
-noise_amplitude = 0    
+noise_amplitude = 0
 
 
 def bivariate_gaussian(x, y, mu_x=0.5, mu_y=0.5, sig=1):
@@ -41,8 +41,9 @@ def main(args):
         img = bivariate_gaussian(xx, yy, mu_x=cx, mu_y=cy, sig=w)
         img += bivariate_gaussian(xx, yy - 2, mu_x=cx, mu_y=cy, sig=w)
         img += bivariate_gaussian(xx, yy + 2, mu_x=cx, mu_y=cy, sig=w)
-        img /= img.sum()  # normalize
+
         img += noise_amplitude * np.random.rand(*img.shape)
+
         images.append(img)
         labels.append((w, cx, cy))
     
