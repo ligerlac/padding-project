@@ -6,7 +6,7 @@ from utils import save_data, load_data
 
 
 n_pixels = 16  # number of rows and columns, images will actually have ()**2 pixels
-noise_amplitude = 0
+noise_amplitude = 0.1
 
 
 def bivariate_gaussian(x, y, mu_x=0.5, mu_y=0.5, sig=1):
@@ -34,18 +34,27 @@ def main(args):
     xx, yy = np.meshgrid(x, y)
     images, labels = [], []
     for i in range(args.n):
-        w = np.random.uniform(0, 1)  # 0: delta peak, 1: rather wide
-        cx = np.random.uniform(0, 1)  # 0: left edge, 1: right edge
-        cy = np.random.uniform(0, 1)  # 0: top edge, 1: bottom edge
 
-        img = bivariate_gaussian(xx, yy, mu_x=cx, mu_y=cy, sig=w)
-        img += bivariate_gaussian(xx, yy - 2, mu_x=cx, mu_y=cy, sig=w)
-        img += bivariate_gaussian(xx, yy + 2, mu_x=cx, mu_y=cy, sig=w)
+        img = np.zeros(xx.shape)
+        w_max = 0
+
+        for j in range(3):
+            w = np.random.gamma(1)  # 0: delta peak, 1: rather wide
+            while w > 3:
+                w = np.random.gamma(1)  # 0: delta peak, 1: rather wide               
+            cx = np.random.uniform(0.25, 0.75)  # 0: left edge, 1: right edge
+            cy = np.random.uniform(0, 1)  # 0: top edge, 1: bottom edge
+            img += bivariate_gaussian(xx, yy, mu_x=cx, mu_y=cy, sig=w)
+            img += bivariate_gaussian(xx, yy - 2, mu_x=cx, mu_y=cy, sig=w)
+            img += bivariate_gaussian(xx, yy + 2, mu_x=cx, mu_y=cy, sig=w)
+            if w > w_max:
+                l = (w, cx, cy)
+                w_max = w
 
         img += noise_amplitude * np.random.rand(*img.shape)
 
         images.append(img)
-        labels.append((w, cx, cy))
+        labels.append(l)
     
     save_data(images, labels, 'data')
 
