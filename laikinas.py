@@ -10,6 +10,8 @@ horizontal_kernel = np.array([[ 1,  1,  1],
                               [ 0,  0,  0],
                               [-1, -1, -1]])
 
+# asfdasfas
+
 # loading data
 def load_data(path):
     with open(f'{path}/images.npy', 'rb') as f:
