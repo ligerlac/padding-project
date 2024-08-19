@@ -15,11 +15,57 @@ from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
 from tensorflow.keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
 
+import tensorflow as tf
+
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from models import Padding, CyclicPadding
 from utils import load_data
+
+from tensorflow.keras.layers import (
+    Layer,
+    Activation,
+    AveragePooling2D,
+    MaxPooling2D,
+    Conv2D,
+    ZeroPadding2D,
+    Dense,
+    Dropout,
+    Flatten,
+    Input,
+    Reshape,
+    UpSampling2D,
+    BatchNormalization,
+)
+
+class CircularPadding2D(Layer):
+    def __init__(self, padding=(1, 1), **kwargs):
+        self.padding = tuple(padding)
+        super(CircularPadding2D, self).__init__(**kwargs)
+
+    def call(self, inputs):
+        padding_height, padding_width = self.padding
+        if padding_width > 0:
+            inputs = tf.concat([inputs[:, :, -padding_width:], inputs, inputs[:, :, :padding_width]], axis=2)
+        if padding_height > 0:
+            inputs = tf.concat([inputs[:, -padding_height:, :], inputs, inputs[:, :padding_height, :]], axis=1)
+        return inputs
+
+class Padding:
+
+    def get_model(self):
+        inputs = Input((16, 16, 1), name="inputs_")
+        outputs = ZeroPadding2D(padding=(2, 0))(inputs)
+        return Model(inputs, outputs, name="padding")
+
+
+class CyclicPadding:
+
+    def get_model(self):
+        inputs = Input((16, 16, 1), name="inputs_")
+        outputs = CircularPadding2D(padding=(2, 0))(inputs)
+        return Model(inputs, outputs, name="cyclic_padding")
+
 
 
 def main(args):
